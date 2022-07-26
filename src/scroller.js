@@ -1,6 +1,6 @@
 var GatherChatScroller = GatherChatScroller || (function () {
   const nameSpace = 'GCS';
-  const sideBarContainer = 'GameComponent-container div';
+  const sideBarContainer = `GameComponent-container div`;
   const chatListSelector = 'css-1vsfs08';
   let instance;
 
@@ -31,12 +31,12 @@ var GatherChatScroller = GatherChatScroller || (function () {
   function ChatScroller() {
     const gameContainer = document.querySelector(`.${sideBarContainer} div`);
     if (!gameContainer)
-      throw new Error('chatBar not shown');
+      throw new Error('GameContainer Not Rendered');
 
     // check initial openState;
-    let sideBarOpened = Boolean(gameContainer.children[1]);
+    let sideBarOpened = Boolean(gameContainer.children.length > 2);
     if (sideBarOpened) {
-      gameContainer.children[1].appendChild(container);
+      gameContainer.lastElementChild.appendChild(container);
     }
 
     const container$ = new MutationObserver((mutations) => {
@@ -49,7 +49,14 @@ var GatherChatScroller = GatherChatScroller || (function () {
           return;
         }
 
-        const chatBar = gameContainer.children[1];
+        if (gameContainer.children.length <= 2) {
+          if (sideBarOpened) {
+            sideBarOpened = false;
+            return;
+          }
+        }
+
+        const chatBar = gameContainer.lastElementChild;
 
         if (mutation.target === gameContainer && mutation.addedNodes[0] === chatBar) {
           if (sideBarOpened) {
@@ -95,7 +102,7 @@ function Observing() {
     mutations.forEach((mutation) => {
       if (mutation.type !== 'childList') return;
       if (!mutation.addedNodes.length) return;
-      const gameContainerLoaded = Array.from(mutation.addedNodes).findIndex(node => node?.classList?.contains("GameComponent-container"));
+      const gameContainerLoaded = Array.from(mutation.addedNodes).findIndex(node => node?.classList?.contains('GameComponent-container'));
       if (gameContainerLoaded > -1) {
         GatherChatScroller.init();
 
